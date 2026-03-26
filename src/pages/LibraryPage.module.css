@@ -1,0 +1,140 @@
+.page {
+  min-height: 100svh;
+  padding-bottom: calc(var(--bottom-nav-height) + var(--space-4));
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  height: var(--header-height);
+}
+
+.tabSwitch {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.tabBtn {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  padding: 0;
+}
+
+.tabBtn.activeTab {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.headerIcons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.hero {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.heroTitle {
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.streakRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.streakLeft {
+  font-weight: var(--font-weight-medium);
+}
+
+.streakRight {
+  font-weight: var(--font-weight-medium);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 0 var(--space-4);
+}
+
+.gridItem {
+  aspect-ratio: 3/4;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-border);
+  padding: 0;
+  cursor: pointer;
+}
+
+.gridItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10) var(--space-4);
+  gap: var(--space-4);
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-size: var(--font-size-base);
+}
+
+.emptyIcon {
+  font-size: 48px;
+}
+
+.fab {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + var(--space-4));
+  right: calc(50% - var(--max-width) / 2 + var(--space-4));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-text);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 90;
+}
+
+@media (max-width: 390px) {
+  .fab {
+    right: var(--space-4);
+  }
+}

@@ -1,0 +1,27 @@
+.wrapper {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.star {
+  font-size: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  color: #E5E0D8;
+}
+
+.star.filled {
+  color: var(--color-star);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}

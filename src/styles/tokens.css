@@ -1,0 +1,48 @@
+:root {
+  /* Colors */
+  --color-primary: #3D6B4F;
+  --color-primary-light: #5A8F6B;
+  --color-bg: #F2EDE6;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #6B6B6B;
+  --color-border: #E5E0D8;
+  --color-star: #F5A623;
+  --color-danger: #E53E3E;
+
+  /* Spacing (8px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+
+  /* Typography */
+  --font-family: 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Shadows */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-nav: 0 -1px 0 var(--color-border);
+
+  /* Layout */
+  --max-width: 390px;
+  --bottom-nav-height: 60px;
+  --header-height: 56px;
+}
