@@ -125,6 +125,10 @@
   padding: 0;
   transition: background 0.2s;
   flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  overflow: hidden;
+  display: block;
 }
 
 .toggleThumb {
