@@ -1,56 +1,49 @@
-# CLAUDE.md — otium-mvp
+# CLAUDE.md — otium
 
-## Project Context
-독서 기록 앱 "오티움" MVP. 예비창업패키지 사업계획서 제출용 데모.
-로그인 없음. 핵심 2가지 기능만: 책 검색 + 책 기록(상태/진도/별점/감상).
+## Project
+독서 기록 + AI 큐레이션 앱. React 18 + Vite + Supabase + Vercel.
+Repo: atreides9/otium (private)
+Live: https://otium-mvp.vercel.app/
 
-## Tech Stack
-- React 18 + Vite
-- Supabase (DB + 실시간)
-- Kakao Book Search API (책 검색)
-- React Router v6
-- Zustand (전역 상태)
-- CSS Modules (스타일링)
+## Stack
+- React 18 + Vite, React Router v6, Zustand, CSS Modules
+- Supabase (Auth + PostgreSQL + Realtime)
+- Kakao Book Search API
+- Vercel (deploy)
 
-## Design System
-- Base unit: 8px grid
-- Primary color: #3D6B4F (딥 그린)
-- Background: #F2EDE6 (웜 베이지)
-- Surface: #FFFFFF
-- Text primary: #1A1A1A
-- Text secondary: #6B6B6B
-- Border radius: 12px (card), 8px (input), 24px (pill button)
-- Font: Pretendard (한글), system-ui fallback
-- Touch targets: min 44px height
+## Design Tokens
+- Background: #F0EBE3 / Surface: #FFFFFF
+- Primary: #3D7A5E / Text: #1A1A1A / Secondary: #8C8C8C
+- Grid: 8px base / Screen padding: 24px / Border-radius: 12px card, 8px input, 24px pill
+- Font: Pretendard, system-ui fallback / Touch target: min 44px
 
 ## File Structure
-```
 src/
-  components/     # 재사용 컴포넌트
-  pages/          # GNB 5개 페이지
-  hooks/          # custom hooks
-  store/          # zustand store
-  api/            # kakao API, supabase client
-  styles/         # global CSS, tokens
-```
+  components/   # 재사용 컴포넌트 (100줄 이하)
+  pages/        # 라우트 페이지
+  hooks/        # custom hooks
+  store/        # zustand (useAuthStore, useBookStore)
+  api/          # supabase.js, kakao.js (API 호출은 여기서만)
+  styles/       # tokens.css (CSS variables 여기서만 선언)
 
-## Critical Rules
-1. 컴포넌트 파일당 100줄 이하 목표
-2. CSS variables는 tokens.css에만 선언
-3. Supabase 호출은 반드시 api/ 폴더에서만
-4. 에러 상태, 로딩 상태 항상 처리
-5. 모바일 퍼스트 (max-width: 390px 기준)
+## Rules
+1. Supabase 호출 → api/ 폴더에서만
+2. CSS variables → tokens.css에서만 선언
+3. 에러/로딩 상태 항상 처리
+4. 모바일 퍼스트 (기준 390px)
+5. 미구현 기능 탭 → "준비중입니다" toast
 
-## MVP Scope (이것만)
-- [ ] 책 검색 (카카오 API)
-- [ ] 책 상태 저장 (읽는중/완독/읽고싶은/중단/하차)
-- [ ] 독서 진도 입력 (읽는중 → %)
-- [ ] 별점 + 감상평 (완독)
-- [ ] 내 서재 목록 표시
+## Auth
+- Supabase 이메일/비밀번호 (소셜 로그인 없음)
+- useAuthStore: { user, session, isLoading }
+- 보호 라우트: /library /explore /record /friends /mypage
+- 미인증 → /login 리다이렉트
 
-## Out of Scope
-- 로그인/회원가입
-- AI 큐레이션
-- 친구/소셜
-- 챌린지
-- 통계 상세
+## DB Tables
+users / books / reading_records / friendships / challenges / challenge_members / notifications / taste_profiles / recommendations
+(상세 스키마는 Supabase 대시보드 참조)
+
+## Current Status
+- 완료: 책 검색, 책 기록, 서재, 달력, 통계, 친구탭 UI, 탐색탭 UI
+- 진행중: Auth (이메일/비밀번호)
+- 미구현: AI 큐레이션, 게이미피케이션, 취향 리포트

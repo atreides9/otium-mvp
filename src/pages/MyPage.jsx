@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserCircle2, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useToast } from '../components/Toast';
+import { supabase } from '../api/supabase';
 import styles from './MyPage.module.css';
 
 const DNA_SEGMENTS = [
@@ -95,6 +97,7 @@ function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
 
 export default function MyPage() {
   const showToast = useToast();
+  const navigate = useNavigate();
   const [toggleStates, setToggleStates] = useState({ '알림 설정': true });
 
   const handleToggleChange = (label, value) => {
@@ -153,7 +156,10 @@ export default function MyPage() {
         <div className={styles.logoutWrap}>
           <button
             className={styles.logoutBtn}
-            onClick={() => showToast('준비중입니다')}
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate('/login');
+            }}
           >
             로그아웃
           </button>
