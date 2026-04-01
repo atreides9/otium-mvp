@@ -1,25 +1,27 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../api/supabase';
+import { signIn } from '../api/userApi';
+import { useToast } from '../components/Toast';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.');
-    } else {
+    try {
+      await signIn({ email, password });
+      localStorage.setItem('hasAccount', 'true');
       navigate('/');
+    } catch {
+      showToast('이메일 또는 비밀번호를 확인해주세요');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,7 +51,7 @@ export default function LoginPage() {
             required
             autoComplete="current-password"
           />
-          {error && <p className={styles.error}>{error}</p>}
+
           <button className={styles.primaryBtn} type="submit" disabled={loading}>
             {loading ? '로그인 중...' : '로그인'}
           </button>

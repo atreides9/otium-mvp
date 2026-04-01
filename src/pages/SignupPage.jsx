@@ -1,38 +1,32 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../api/supabase';
+import { signUp, insertUser } from '../api/userApi';
+import { useToast } from '../components/Toast';
 import styles from './SignupPage.module.css';
 
 export default function SignupPage() {
   const navigate = useNavigate();
+  const showToast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
-      if (signUpError) throw signUpError;
+      const data = await signUp({ email, password });
 
       if (data.user) {
-        const { error: insertError } = await supabase.from('users').insert({
-          id: data.user.id,
-          email,
-          nickname,
-          created_at: new Date().toISOString(),
-        });
-        if (insertError) throw insertError;
+        await insertUser({ id: data.user.id, email, nickname });
       }
 
+      localStorage.setItem('hasAccount', 'true');
       navigate('/');
     } catch (err) {
-      setError(err.message ?? '회원가입에 실패했습니다. 다시 시도해 주세요.');
+      showToast(err.message ?? '회원가입에 실패했습니다. 다시 시도해 주세요.');
     } finally {
       setLoading(false);
     }
@@ -73,7 +67,7 @@ export default function SignupPage() {
             required
             autoComplete="nickname"
           />
-          {error && <p className={styles.error}>{error}</p>}
+
           <button className={styles.primaryBtn} type="submit" disabled={loading}>
             {loading ? '처리 중...' : '회원가입'}
           </button>

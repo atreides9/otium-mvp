@@ -24,7 +24,10 @@ function AuthInit({ children }) {
 function ProtectedRoute({ children }) {
   const { user, isLoading } = useAuthStore();
   if (isLoading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) {
+    const hasAccount = localStorage.getItem('hasAccount') === 'true';
+    return <Navigate to={hasAccount ? '/login' : '/signup'} replace />;
+  }
   return children;
 }
 
