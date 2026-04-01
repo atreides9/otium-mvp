@@ -48,6 +48,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/record/:isbn" element={<ProtectedRoute><RecordPage /></ProtectedRoute>} />
             <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
             <Route path="/explore/recommend/:id" element={<ProtectedRoute><RecommendDetailPage /></ProtectedRoute>} />
+            <Route path="/explore/rec-detail" element={<ProtectedRoute><RecommendDetailPage /></ProtectedRoute>} />
             <Route path="/record-stats" element={<ProtectedRoute><RecordStatsPage /></ProtectedRoute>} />
             <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
             <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />

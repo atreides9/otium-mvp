@@ -1,31 +1,18 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { useAuthStore } from '../store/authStore';
+import { useRecommendations } from '../hooks/useRecommendations';
 import BottomNav from '../components/BottomNav';
-import { MOCK_RECOMMEND_BOOKS } from './RecommendDetailPage';
 import styles from './ExplorePage.module.css';
 
-const BASE_RECOMMENDATIONS = [
-  { title: '사랑의 기술', thumbnail: 'https://covers.openlibrary.org/b/isbn/9780062138927-M.jpg' },
-  { title: '먹고 기도하고 사랑하라', thumbnail: 'https://covers.openlibrary.org/b/isbn/9780143038412-M.jpg' },
-  { title: '물고기는 존재하지 않는다', thumbnail: 'https://covers.openlibrary.org/b/isbn/9781501160271-M.jpg' },
-  { title: '브람스를 좋아하세요', thumbnail: 'https://covers.openlibrary.org/b/isbn/9780140020229-M.jpg' },
-];
-
-function shuffled(arr) {
-  const copy = [...arr];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}
-
 export default function ExplorePage() {
-  const [books, setBooks] = useState(BASE_RECOMMENDATIONS);
+  const { user } = useAuthStore();
+  const { books, isLoading, daysUntilNext, isRequesting, requestNew } = useRecommendations(user?.id);
   const showToast = useToast();
   const navigate = useNavigate();
+
+  const isOnCooldown = daysUntilNext > 0;
 
   return (
     <div className={styles.page}>
@@ -37,35 +24,62 @@ export default function ExplorePage() {
         </div>
       </header>
 
-      <p className={styles.sectionTitle}>오티움님이 좋아하실만한 책</p>
+      {isLoading ? (
+        <>
+          <p className={styles.sectionTitle}>오티움님이 좋아하실만한 책</p>
+          <div className={styles.grid}>
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className={`${styles.gridItem} ${styles.skeleton}`} />
+            ))}
+          </div>
+        </>
+      ) : books.length === 0 ? (
+        <div className={styles.emptyState}>
+          <p className={styles.emptyText}>아직 추천 책이 없어요</p>
+          <p className={styles.emptySubText}>독서 기록을 쌓으면 맞춤 추천을 받을 수 있어요</p>
+          <button className={styles.shuffleBtn} onClick={requestNew} disabled={isRequesting}>
+            {isRequesting ? '추천 생성 중...' : '추천받기'}
+          </button>
+        </div>
+      ) : (
+        <>
+          <p className={styles.sectionTitle}>오티움님이 좋아하실만한 책</p>
+          <div className={styles.grid}>
+            {books.map((book) => (
+              <div
+                key={book.isbn ?? book.id ?? book.title}
+                className={styles.gridItem}
+                aria-label={book.title}
+                onClick={() => navigate('/explore/rec-detail', { state: { book, reason: book.reason_copy } })}
+                style={{ cursor: 'pointer' }}
+              >
+                <img
+                  src={book.cover_url ?? book.thumbnail}
+                  alt={book.title}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+            ))}
+          </div>
 
-      <div className={styles.grid}>
-        {books.map((book, index) => {
-          const detailId = MOCK_RECOMMEND_BOOKS[index]?.id;
-          return (
-            <div
-              key={book.title}
-              className={styles.gridItem}
-              aria-label={book.title}
-              onClick={() => detailId && navigate('/explore/recommend/' + detailId)}
-              style={{ cursor: detailId ? 'pointer' : 'default' }}
+          <div className={styles.cta}>
+            <button
+              className={styles.shuffleBtn}
+              onClick={requestNew}
+              disabled={isOnCooldown || isRequesting}
             >
-              <img
-                src={book.thumbnail}
-                alt={book.title}
-                onError={(e) => { e.target.style.background = 'var(--color-border)'; e.target.style.display = 'none'; }}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      <div className={styles.cta}>
-        <button className={styles.shuffleBtn} onClick={() => setBooks(shuffled(BASE_RECOMMENDATIONS))}>
-          또 추천받기
-        </button>
-        <span className={styles.countdown}>다음 추천까지 D-2</span>
-      </div>
+              {isRequesting ? (
+                <span className={styles.btnSpinner} />
+              ) : (
+                '또 추천받기'
+              )}
+            </button>
+            {isOnCooldown && (
+              <span className={styles.countdown}>다음 추천까지 D-{daysUntilNext}</span>
+            )}
+          </div>
+        </>
+      )}
 
       <BottomNav />
     </div>
