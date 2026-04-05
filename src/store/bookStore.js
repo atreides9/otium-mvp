@@ -8,9 +8,11 @@ export const useBookStore = create((set, get) => ({
 
   fetchRecords: async () => {
     set({ loading: true, error: null });
+    const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from('book_records')
       .select('*')
+      .eq('user_id', user?.id)
       .order('created_at', { ascending: false });
     if (error) {
       set({ error: error.message, loading: false });
@@ -21,9 +23,10 @@ export const useBookStore = create((set, get) => ({
 
   addRecord: async (record) => {
     set({ loading: true, error: null });
+    const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from('book_records')
-      .insert([record])
+      .insert([{ ...record, user_id: user?.id }])
       .select()
       .single();
     if (error) {
