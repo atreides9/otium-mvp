@@ -14,7 +14,7 @@
 .title {
   font-size: 22px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .headerIcons {
@@ -33,7 +33,7 @@
 .sectionTitle {
   font-size: 16px;
   font-weight: var(--font-weight-bold);
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   padding: 0 var(--space-4);
   margin-top: 24px;
   margin-bottom: var(--space-3);
@@ -50,7 +50,7 @@
   aspect-ratio: 3/4;
   border-radius: 8px;
   overflow: hidden;
-  background: var(--color-border);
+  background: var(--color-border-default);
   transition: transform 0.1s ease;
 }
 
@@ -76,22 +76,22 @@
 .shuffleBtn {
   width: 160px;
   height: 48px;
-  border: 1.5px solid #1A1A1A;
+  border: 1.5px solid var(--color-text-primary);
   border-radius: 24px;
   font-size: 16px;
   font-weight: var(--font-weight-medium);
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   background: transparent;
   cursor: pointer;
 }
 
 .countdown {
   font-size: 13px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--color-border) 25%, #e8e8e8 50%, var(--color-border) 75%);
+  background: linear-gradient(90deg, var(--color-border-default) 25%, #e8e8e8 50%, var(--color-border-default) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -114,12 +114,12 @@
 .emptyText {
   font-size: 16px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .emptySubText {
   font-size: 14px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   margin-top: -8px;
 }
 
@@ -127,7 +127,7 @@
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid #1A1A1A;
+  border: 2px solid var(--color-text-primary);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;

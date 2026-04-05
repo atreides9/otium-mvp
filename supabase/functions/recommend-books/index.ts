@@ -5,11 +5,18 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const KAKAO_API_KEY = Deno.env.get('KAKAO_API_KEY')!;
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
 
-interface TasteProfile {
-  user_id: string;
-  completed_count: number;
-  genre_distribution: Record<string, number>;
-  high_rated_titles: string[];
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+interface BookRecord {
+  kakao_isbn: string;
+  title: string;
+  author: string;
+  rating: number | null;
+  status: string;
 }
 
 interface KakaoBook {
@@ -28,78 +35,85 @@ interface Recommendation {
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  let user_id: string;
-  try {
-    const body = await req.json();
-    user_id = body.user_id;
-    if (!user_id) throw new Error('missing user_id');
-  } catch {
-    return new Response(JSON.stringify({ error: 'invalid request body' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
+  // Verify JWT and extract user_id from token
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-
-  // 1. Load taste profile
-  const { data: profile, error: profileError } = await supabase
-    .from('taste_profiles')
-    .select('*')
-    .eq('user_id', user_id)
-    .single();
-
-  if (profileError || !profile) {
-    console.error('taste_profile fetch error:', profileError);
-    return new Response(JSON.stringify({ error: 'taste_profile_not_found' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
+  const token = authHeader.slice(7);
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+  const user_id = user.id;
 
-  const tasteProfile = profile as TasteProfile;
-
-  // 2. Pull candidate books from Kakao API
-  const genreEntries = Object.entries(tasteProfile.genre_distribution)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 2);
-  const topGenres = genreEntries.map(([genre]) => genre);
-
-  // Get already-read ISBNs
-  const { data: readRecords, error: readError } = await supabase
-    .from('reading_records')
-    .select('isbn')
+  // 1. Load user's book_records
+  const { data: allRecords, error: recordsError } = await supabase
+    .from('book_records')
+    .select('kakao_isbn, title, author, rating, status')
     .eq('user_id', user_id);
 
-  if (readError) {
-    console.error('reading_records fetch error:', readError);
+  if (recordsError) {
+    console.error('book_records fetch error:', recordsError);
     return new Response(JSON.stringify({ error: 'database error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
-  const readIsbns = new Set((readRecords ?? []).map((r: { isbn: string }) => r.isbn));
+  const records: BookRecord[] = allRecords ?? [];
+  const completedBooks = records.filter((r) => r.status === '완독');
+  const highRatedTitles = completedBooks
+    .filter((r) => r.rating != null && r.rating >= 4)
+    .map((r) => r.title);
 
+  // Already-read ISBNs (all statuses)
+  const readIsbns = new Set(records.map((r) => r.kakao_isbn).filter(Boolean));
+
+  // 2. Build Kakao search queries from top-rated authors, or fallback
+  const topAuthors = [
+    ...new Set(
+      completedBooks
+        .filter((r) => r.rating != null && r.rating >= 4)
+        .map((r) => r.author)
+        .filter(Boolean)
+    ),
+  ].slice(0, 2);
+
+  const searchQueries = topAuthors.length > 0 ? topAuthors : ['베스트셀러 소설', '자기계발'];
+
+  // 3. Pull candidate books from Kakao API
   let candidateBooks: KakaoBook[] = [];
-  for (const genre of topGenres) {
+  for (const query of searchQueries) {
     try {
       const kakaoRes = await fetch(
-        `https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(genre)}&size=10`,
+        `https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(query)}&size=10`,
         { headers: { Authorization: `KakaoAK ${KAKAO_API_KEY}` } }
       );
       if (!kakaoRes.ok) {
         console.error('Kakao API error:', kakaoRes.status, await kakaoRes.text());
         return new Response(JSON.stringify({ error: 'kakao api error' }), {
           status: 502,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       const kakaoData = await kakaoRes.json();
@@ -111,7 +125,7 @@ Deno.serve(async (req: Request) => {
       console.error('Kakao API fetch exception:', err);
       return new Response(JSON.stringify({ error: 'kakao api error' }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
   }
@@ -124,6 +138,13 @@ Deno.serve(async (req: Request) => {
     return true;
   });
 
+  if (candidateBooks.length === 0) {
+    return new Response(JSON.stringify({ error: 'no_candidates' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   const candidatesJson = JSON.stringify(
     candidateBooks.map((b) => ({
       isbn: b.isbn,
@@ -134,12 +155,11 @@ Deno.serve(async (req: Request) => {
     }))
   );
 
-  // 3. Call Claude API
+  // 4. Call Claude API
   const userPrompt = `User reading profile:
 
-Completed books: ${tasteProfile.completed_count}
-Genre distribution: ${JSON.stringify(tasteProfile.genre_distribution)}
-Highly rated (4+): ${JSON.stringify(tasteProfile.high_rated_titles ?? [])}
+Completed books: ${completedBooks.length}
+Highly rated (4+): ${JSON.stringify(highRatedTitles)}
 
 Candidate books (pick exactly 4):
 ${candidatesJson}
@@ -157,7 +177,7 @@ Return JSON:
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 512,
         system: 'You are a book curator. Return only valid JSON. No markdown.',
         messages: [{ role: 'user', content: userPrompt }],
@@ -168,7 +188,7 @@ Return JSON:
       console.error('Claude API error:', claudeRes.status, await claudeRes.text());
       return new Response(JSON.stringify({ error: 'claude api error' }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -185,11 +205,11 @@ Return JSON:
     console.error('Claude API exception:', err);
     return new Response(JSON.stringify({ error: 'claude api error' }), {
       status: 502,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
-  // 4. Save to recommendations table
+  // 5. Save to recommendations table
   const shownAt = new Date().toISOString();
   const nextAvailableAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -207,11 +227,11 @@ Return JSON:
     console.error('recommendations insert error:', insertError);
     return new Response(JSON.stringify({ error: 'database error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
-  // 5. Build full metadata response
+  // 6. Build full metadata response
   const bookMap = new Map(candidateBooks.map((b) => [b.isbn, b]));
   const responseBooks = recommendations.map((r) => {
     const meta = bookMap.get(r.isbn);
@@ -228,6 +248,6 @@ Return JSON:
 
   return new Response(
     JSON.stringify({ recommendations: responseBooks, next_available_at: nextAvailableAt }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 });

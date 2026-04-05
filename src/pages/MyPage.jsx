@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle2, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useToast } from '../components/Toast';
-import { supabase } from '../api/supabase';
+import { signOut } from '../api/userApi';
+import { useAuthStore } from '../store/authStore';
 import styles from './MyPage.module.css';
 
 const DNA_SEGMENTS = [
@@ -52,7 +53,7 @@ function Toggle({ on, onChange }) {
       aria-checked={on}
       onClick={() => onChange(!on)}
       className={styles.toggle}
-      style={{ background: on ? '#3D6B4F' : '#D1D5DB' }}
+      style={{ background: on ? 'var(--secondary-500)' : '#D1D5DB' }}
     >
       <span
         className={styles.toggleThumb}
@@ -77,7 +78,7 @@ function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
               <span className={styles.menuLabel}>{item.label}</span>
               {item.sub && <span className={styles.menuSub}>{item.sub}</span>}
             </div>
-            {item.type === 'arrow' && <ChevronRight size={18} color="#9CA3AF" />}
+            {item.type === 'arrow' && <ChevronRight size={18} color="var(--color-icon-muted)" />}
             {item.type === 'toggle' && (
               <Toggle
                 on={toggleStates[item.label] ?? true}
@@ -98,6 +99,8 @@ function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
 export default function MyPage() {
   const showToast = useToast();
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const nickname = useAuthStore((state) => state.nickname);
   const [toggleStates, setToggleStates] = useState({ '알림 설정': true });
 
   const handleToggleChange = (label, value) => {
@@ -116,9 +119,14 @@ export default function MyPage() {
         {/* 프로필 카드 */}
         <div className={styles.card} style={{ marginBottom: 16 }}>
           <div className={styles.profileRow}>
-            <UserCircle2 size={56} color="#9CA3AF" strokeWidth={1.5} />
+            <UserCircle2 size={56} color="var(--color-icon-muted)" strokeWidth={1.5} />
             <div className={styles.profileInfo}>
-              <span className={styles.profileName}>오티움</span>
+              <span className={styles.profileName}>
+                {nickname ?? '-'}
+              </span>
+              <span className={styles.profileEmail}>
+                {user?.email ?? ''}
+              </span>
               <div className={styles.dnaBar}>
                 {DNA_SEGMENTS.map((seg) => (
                   <div
@@ -157,7 +165,7 @@ export default function MyPage() {
           <button
             className={styles.logoutBtn}
             onClick={async () => {
-              await supabase.auth.signOut();
+              await signOut();
               navigate('/login');
             }}
           >

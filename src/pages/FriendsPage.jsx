@@ -81,7 +81,7 @@ export default function FriendsPage() {
           {MOCK_FRIENDS.map((f) => (
             <div key={f.name} className={styles.friendItem}>
               <div className={styles.friendAvatarWrap}>
-                <UserCircle2 size={48} color="#9CA3AF" strokeWidth={1.5} />
+                <UserCircle2 size={48} color="var(--color-icon-muted)" strokeWidth={1.5} />
                 {f.online && <span className={styles.onlineDot} />}
               </div>
               <span className={styles.friendName}>{f.name}</span>
@@ -108,7 +108,7 @@ export default function FriendsPage() {
                   <div className={styles.participantRow}>
                     <div className={styles.rankCircle}>{i + 1}</div>
                     <div className={styles.pAvatar}>
-                      <UserCircle2 size={32} color="#9CA3AF" strokeWidth={1.5} />
+                      <UserCircle2 size={32} color="var(--color-icon-muted)" strokeWidth={1.5} />
                     </div>
                     <div className={styles.pInfo}>
                       <div className={styles.pNameRow}>
@@ -117,7 +117,7 @@ export default function FriendsPage() {
                       </div>
                       <span className={styles.pGoal}>{p.goal}</span>
                     </div>
-                    <ChevronRight size={16} color="#9CA3AF" />
+                    <ChevronRight size={16} color="var(--color-icon-muted)" />
                   </div>
                   {i < ch.participants.length - 1 && <div className={styles.divider} />}
                 </div>

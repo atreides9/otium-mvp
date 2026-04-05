@@ -8,8 +8,8 @@
 
 ## Environment Variables (.env)
 VITE_KAKAO_API_KEY=your_kakao_rest_api_key
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=https://vkmskdgkhscybzvrxfkv.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrbXNrZGdraHNjeWJ6dnJ4Zmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwOTQwNjYsImV4cCI6MjA4OTY3MDA2Nn0.1IfOdxjnaQZuv17OqtJvQN9AS1thuJmh-e1QLs0jpBE
 
 ## Color Tokens (use these exact values)
 --color-primary: #3D6B4F

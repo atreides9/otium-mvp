@@ -17,7 +17,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const data = await signUp({ email, password });
+      const data = await signUp({ email, password, nickname });
 
       if (data.user) {
         await insertUser({ id: data.user.id, email, nickname });

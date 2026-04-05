@@ -95,7 +95,7 @@ export default function RecommendDetailPage() {
       {/* Header */}
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="뒤로가기">
-          <ChevronLeft size={24} color="#1A1A1A" />
+          <ChevronLeft size={24} color="var(--color-text-primary)" />
         </button>
         <div className={styles.headerCenter}>
           <span className={styles.headerTitle}>{book.title}</span>

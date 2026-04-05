@@ -25,11 +25,25 @@ export default function RecordPage() {
   const [review, setReview] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const today = new Date().toISOString().split('T')[0];
+
+  const handleStartDateChange = (value) => {
+    if (value > today) { showToast('오늘 이후 날짜는 선택할 수 없어요'); return; }
+    if (endDate && value > endDate) { showToast('시작일은 완독일보다 이전이어야 해요'); return; }
+    setStartDate(value);
+  };
+
+  const handleEndDateChange = (value) => {
+    if (value > today) { showToast('오늘 이후 날짜는 선택할 수 없어요'); return; }
+    if (startDate && value < startDate) { showToast('완독일은 시작일보다 이후여야 해요'); return; }
+    setEndDate(value);
+  };
+
   const handleSave = async () => {
     if (!status) return;
     setSaving(true);
     try {
-      await addRecord({
+      const saved = await addRecord({
         kakao_isbn: book.isbn,
         title: book.title,
         author: book.authors?.join(', ') ?? book.author ?? '',
@@ -41,7 +55,7 @@ export default function RecordPage() {
         rating: ['완독', '읽고싶은'].includes(status) ? rating : null,
         review: ['완독', '읽고싶은'].includes(status) ? review : null,
       });
-      navigate('/');
+      navigate(`/book/${book.isbn}`, { state: { record: saved }, replace: true });
     } catch {
       showToast('저장에 실패했어요. 다시 시도해주세요');
     } finally {
@@ -90,7 +104,8 @@ export default function RecordPage() {
             type="date"
             className={styles.dateInput}
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            max={today}
+            onChange={(e) => handleStartDateChange(e.target.value)}
             aria-label="독서 시작일"
           />
 
@@ -123,14 +138,16 @@ export default function RecordPage() {
               type="date"
               className={styles.dateInput}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              max={today}
+              onChange={(e) => handleStartDateChange(e.target.value)}
               aria-label="시작일"
             />
             <input
               type="date"
               className={styles.dateInput}
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              max={today}
+              onChange={(e) => handleEndDateChange(e.target.value)}
               aria-label="종료일"
             />
           </div>
@@ -178,7 +195,8 @@ export default function RecordPage() {
             type="date"
             className={styles.dateInput}
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            max={today}
+            onChange={(e) => handleStartDateChange(e.target.value)}
             aria-label="날짜"
           />
         </div>

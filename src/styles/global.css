@@ -9,13 +9,13 @@
 
 html, body {
   height: 100%;
-  background: var(--color-bg);
+  background: var(--color-bg-base);
 }
 
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -23,7 +23,7 @@ body {
   min-height: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  background: var(--color-bg);
+  background: var(--color-bg-base);
   position: relative;
 }
 
@@ -55,6 +55,6 @@ img {
 
 /* Focus ring */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }

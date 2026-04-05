@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Plus } from 'lucide-react';
 import { useBookStore } from '../store/bookStore';
 import { useToast } from '../components/Toast';
+import { useAuthStore } from '../store/authStore';
 import BottomNav from '../components/BottomNav';
 import styles from './LibraryPage.module.css';
 
@@ -25,6 +26,7 @@ export default function LibraryPage() {
   const navigate = useNavigate();
   const { records, loading, fetchRecords } = useBookStore();
   const showToast = useToast();
+  const nickname = useAuthStore((s) => s.nickname);
   const [activeTab, setActiveTab] = useState('서재');
 
   useEffect(() => { fetchRecords(); }, []);
@@ -59,7 +61,7 @@ export default function LibraryPage() {
         <>
           <div className={styles.hero}>
             <p className={styles.subtitle}>책 읽고 싶어지는 저녁이에요,</p>
-            <h1 className={styles.heroTitle}>오티움님의 서재</h1>
+            <h1 className={styles.heroTitle}>{nickname ?? '...'}님의 서재</h1>
             <div className={styles.streakRow}>
               <span className={styles.streakLeft}>🔥 1일 연속 독서 중</span>
               <span className={styles.streakRight}>{visibleRecords.length}권 / {records.length}권</span>
@@ -74,7 +76,7 @@ export default function LibraryPage() {
                 <button
                   key={r.id}
                   className={styles.gridItem}
-                  onClick={() => navigate(`/record/${r.kakao_isbn}`, { state: { book: r, existing: true } })}
+                  onClick={() => navigate(`/book/${r.kakao_isbn}`, { state: { record: r } })}
                   aria-label={r.title}
                 >
                   <img src={r.thumbnail || '/book-placeholder.png'} alt={r.title} onError={(e) => { e.target.src = '/book-placeholder.png'; }} />

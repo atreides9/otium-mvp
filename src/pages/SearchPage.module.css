@@ -1,6 +1,6 @@
 .page {
   min-height: 100svh;
-  background: var(--color-bg);
+  background: var(--color-bg-base);
   display: flex;
   flex-direction: column;
 }
@@ -11,8 +11,8 @@
   padding: 0 var(--space-4);
   height: var(--header-height);
   gap: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-elevated);
 }
 
 .backBtn {
@@ -21,7 +21,7 @@
   min-height: 44px;
   display: flex;
   align-items: center;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .headerTitle {
@@ -33,18 +33,18 @@
 .nextBtn {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
+  color: var(--color-icon-active);
   min-height: 44px;
   padding: 0 var(--space-2);
 }
 
 .nextBtn:disabled {
-  color: #9CA3AF;
+  color: var(--color-icon-muted);
 }
 
 .searchBox {
   padding: var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-bg-elevated);
 }
 
 .inputWrapper {
@@ -61,7 +61,7 @@
   border-radius: 12px;
   font-size: var(--font-size-base);
   background: #F3F4F6;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .input:focus {
@@ -71,7 +71,7 @@
 .searchIcon {
   position: absolute;
   right: var(--space-4);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-size: 18px;
   pointer-events: none;
 }
@@ -88,10 +88,10 @@
 .status {
   text-align: center;
   padding: var(--space-8);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-base);
 }
 
 .error {
-  color: var(--color-danger);
+  color: var(--color-status-error-icon);
 }

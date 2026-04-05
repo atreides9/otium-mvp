@@ -3,7 +3,7 @@
   bottom: calc(var(--bottom-nav-height) + var(--space-4));
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: #1A1A1A;
+  background: var(--color-text-primary);
   color: white;
   padding: 12px 20px;
   border-radius: 8px;

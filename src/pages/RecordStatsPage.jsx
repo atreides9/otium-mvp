@@ -1,45 +1,83 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import BottomNav from '../components/BottomNav';
 import { useToast } from '../components/Toast';
+import { useBookStore } from '../store/bookStore';
 import styles from './RecordStatsPage.module.css';
 
-/* ── Section 1: 누적 완독 페이지 ── */
-const BOOK_STACK = [
-  { title: '1984', color: '#93C5FD' },
-  { title: '자유론', color: '#374151' },
-  { title: '죄와 벌 어쩌고저쩌고', color: '#6EE7B7' },
-  { title: '어린왕자', color: '#FDE68A' },
-  { title: '데미안', color: '#C4B5FD' },
-  { title: '노르웨이의 숲', color: '#6EE7B7' },
-  { title: '코스모스 어쩌고', color: '#FCA5A5' },
-  { title: '파친코', color: '#D1FAE5' },
-  { title: '사피엔스', color: '#A7F3D0' },
-  { title: '먹', color: '#FCD34D' },
-  { title: '브람스를 좋아하세요', color: '#FBCFE8' },
-  { title: '자유론', color: '#374151' },
-  { title: '1984', color: '#93C5FD' },
-];
-
-/* ── Section 2: 독서 달력 ── */
-const MOCK_CALENDAR_BOOKS = [
-  { date: 4,  img: 'https://covers.openlibrary.org/b/isbn/9780156012195-M.jpg' },
-  { date: 5,  img: 'https://covers.openlibrary.org/b/isbn/9780451524935-M.jpg' },
-  { date: 6,  img: 'https://covers.openlibrary.org/b/isbn/9780062600271-M.jpg' },
-  { date: 9,  img: 'https://covers.openlibrary.org/b/isbn/9780375704024-M.jpg' },
-  { date: 11, img: 'https://covers.openlibrary.org/b/isbn/9781455563920-M.jpg' },
-  { date: 12, img: 'https://covers.openlibrary.org/b/isbn/9780345539434-M.jpg' },
-  { date: 15, img: 'https://covers.openlibrary.org/b/isbn/9780062138927-M.jpg' },
-  { date: 17, img: 'https://covers.openlibrary.org/b/isbn/9780140020229-M.jpg' },
-  { date: 18, img: 'https://covers.openlibrary.org/b/isbn/9781501160271-M.jpg' },
-  { date: 22, img: 'https://covers.openlibrary.org/b/isbn/9780439708180-M.jpg' },
-  { date: 24, img: 'https://covers.openlibrary.org/b/isbn/9780062600271-M.jpg' },
-  { date: 25, img: 'https://covers.openlibrary.org/b/isbn/9780451526342-M.jpg' },
-];
-const CALENDAR_BOOK_MAP = Object.fromEntries(MOCK_CALENDAR_BOOKS.map(b => [b.date, b.img]));
-
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
+const PILL_COLORS = [
+  '#93C5FD', '#6EE7B7', '#FDE68A', '#C4B5FD', '#FCA5A5',
+  '#D1FAE5', '#A7F3D0', '#FCD34D', '#FBCFE8', '#374151',
+];
+
+const RANK_COLORS = ['#B8860B', 'var(--color-icon-muted)', '#CD7F32', 'var(--color-text-tertiary)', 'var(--color-text-tertiary)'];
+
+// 유저 정의 장르 → 고정 색상
+const GENRE_COLOR_MAP = {
+  '소설':         '#A78BFA',
+  '에세이':       '#FCD34D',
+  '사회과학':     '#2DD4BF',
+  '과학':         '#4ADE80',
+  '자기계발':     '#60A5FA',
+  '경영/경제':    '#FB923C',
+  '시':           '#E879F9',
+  '희곡':         '#F472B6',
+  '예술':         '#F87171',
+  '역사':         '#FBBF24',
+  '인문학':       '#34D399',
+  '종교/역학':    '#A3E635',
+  '컴퓨터':       '#38BDF8',
+  '외국어':       '#818CF8',
+  '만화/라이트노벨': '#F9A8D4',
+  '건강/취미':    '#86EFAC',
+  '여행':         '#FDE68A',
+  '전집':         '#C4B5FD',
+  '요리/살림':    '#FCA5A5',
+  '좋은부모':     '#6EE7B7',
+  '청소년':       '#93C5FD',
+  '어린이':       '#D1FAE5',
+  '기타':         '#D1D5DB',
+};
+
+// Kakao category_name → 유저 장르 매핑
+function mapToGenre(categoryName) {
+  if (!categoryName) return '기타';
+  const c = categoryName;
+  if (c.includes('에세이'))                          return '에세이';
+  if (c.includes('희곡'))                            return '희곡';
+  if (c.includes('소설'))                            return '소설';
+  if (/[^가-힣]시[^가-힣]|^시$|[>]\s*시$/.test(c)) return '시';
+  if (c.includes('사회과학') || c.startsWith('사회')) return '사회과학';
+  if (c.includes('인문'))                            return '인문학';
+  if (c.includes('경영') || c.includes('경제'))      return '경영/경제';
+  if (c.includes('자기계발'))                        return '자기계발';
+  if (c.includes('과학'))                            return '과학';
+  if (c.includes('예술'))                            return '예술';
+  if (c.includes('역사'))                            return '역사';
+  if (c.includes('종교') || c.includes('역학'))      return '종교/역학';
+  if (c.includes('컴퓨터') || c.includes('모바일') || c.includes('IT')) return '컴퓨터';
+  if (c.includes('외국어'))                          return '외국어';
+  if (c.includes('만화') || c.includes('라이트노벨')) return '만화/라이트노벨';
+  if (c.includes('건강') || c.includes('취미') || c.includes('스포츠')) return '건강/취미';
+  if (c.includes('여행'))                            return '여행';
+  if (c.includes('전집') || c.includes('세트'))      return '전집';
+  if (c.includes('요리') || c.includes('살림'))      return '요리/살림';
+  if (c.includes('좋은부모') || c.includes('육아'))  return '좋은부모';
+  if (c.includes('청소년'))                          return '청소년';
+  if (c.includes('어린이') || c.includes('아동'))    return '어린이';
+  return '기타';
+}
+
+const HEIGHT_MILESTONES = [
+  { minBooks: 50,  label: '어른 키만큼 읽었어요' },
+  { minBooks: 30,  label: '초등학생만큼 읽었어요' },
+  { minBooks: 15,  label: '2살 아이만큼 읽었어요' },
+  { minBooks: 8,   label: '고양이만큼 읽었어요' },
+  { minBooks: 1,   label: '첫 발을 내딛었어요' },
+];
 
 function buildCalendarDays(year, month) {
   const firstDay = new Date(year, month, 1).getDay();
@@ -50,70 +88,18 @@ function buildCalendarDays(year, month) {
   return cells;
 }
 
-/* ── Section 3: 자주 읽은 작가 ── */
-const MOCK_AUTHORS = [
-  { rank: 1, initial: '정', name: '정유정',    genre: '소설 · 스릴러',  count: 3, rankColor: '#B8860B' },
-  { rank: 2, initial: '유', name: '유발 하라리', genre: '인문 · 철학',   count: 3, rankColor: '#9CA3AF' },
-  { rank: 3, initial: '이', name: '이미예',    genre: '소설 · 판타지',  count: 2, rankColor: '#CD7F32' },
-  { rank: 4, initial: '김', name: '김영하',    genre: '소설 · SF',     count: 2, rankColor: '#6B6B6B' },
-  { rank: 5, initial: '아', name: '아니 에르노', genre: '소설 · 자전적', count: 2, rankColor: '#6B6B6B' },
-];
-
-/* ── Section 4: 이 작가도 좋아할 것 같아요 ── */
-const MOCK_SIMILAR_AUTHORS = [
-  { initial: '문', name: '문요한' },
-  { initial: '헤', name: '헤르만 헤세' },
-  { initial: '카', name: '카뮈' },
-];
-
-/* ── Section 5: 장르별 기록 ── */
-const GENRE_DATA = [
-  { name: '문학',    value: 27, color: '#A78BFA' },
-  { name: '에세이',  value: 15, color: '#FCD34D' },
-  { name: '인문/철학', value: 12, color: '#2DD4BF' },
-  { name: '경영/경제', value: 9,  color: '#4ADE80' },
-  { name: '자기계발', value: 5,  color: '#64748B' },
-  { name: '과학',    value: 3,  color: '#F87171' },
-  { name: '예술',    value: 1,  color: '#FCA5A5' },
-  { name: '기타',    value: 1,  color: '#D1D5DB' },
-];
-
-/* ── Baby silhouette SVG ── */
-function BabySilhouette() {
-  return (
-    <svg
-      viewBox="0 0 100 140"
-      height="220"
-      xmlns="http://www.w3.org/2000/svg"
-      className={styles.babySvg}
-    >
-      {/* Head */}
-      <circle cx="50" cy="30" r="22" fill="#8B7355" />
-      {/* Body */}
-      <ellipse cx="50" cy="80" rx="28" ry="35" fill="#8B7355" />
-      {/* Left arm */}
-      <circle cx="18" cy="72" r="10" fill="#8B7355" />
-      {/* Right arm */}
-      <circle cx="82" cy="72" r="10" fill="#8B7355" />
-      {/* Left leg */}
-      <rect x="30" y="108" width="14" height="26" rx="7" fill="#8B7355" />
-      {/* Right leg */}
-      <rect x="56" y="108" width="14" height="26" rx="7" fill="#8B7355" />
-    </svg>
-  );
-}
-
 export default function RecordStatsPage() {
   const toast = useToast();
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const { records, loading, fetchRecords } = useBookStore();
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
 
   const cells = buildCalendarDays(currentYear, currentMonth);
-
-  // Only show book thumbnails for the base month (March 2026 = month index 2)
-  const isBookMonth =
-    currentYear === today.getFullYear() && currentMonth === today.getMonth();
 
   function prevMonth() {
     if (currentMonth === 0) { setCurrentYear(y => y - 1); setCurrentMonth(11); }
@@ -129,6 +115,66 @@ export default function RecordStatsPage() {
     currentMonth === today.getMonth() &&
     currentYear === today.getFullYear();
 
+  // Section 1: 완독 책 스택
+  const completedBooks = useMemo(
+    () => records.filter(r => r.status === '완독'),
+    [records]
+  );
+
+  const heightM = (completedBooks.length * 0.02).toFixed(2);
+
+  const milestone = HEIGHT_MILESTONES.find(m => completedBooks.length >= m.minBooks);
+
+  // Section 2: 달력 날짜 → 썸네일 (완독=end_date, 읽는중=start_date)
+  const calendarMap = useMemo(() => {
+    const map = {};
+    for (const r of records) {
+      let dateStr = null;
+      if (r.status === '완독' && r.end_date) dateStr = r.end_date;
+      else if (r.status === '읽는중' && r.start_date) dateStr = r.start_date;
+      if (!dateStr) continue;
+      const d = new Date(dateStr);
+      if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+        const day = d.getDate();
+        if (!map[day]) map[day] = r.thumbnail;
+      }
+    }
+    return map;
+  }, [records, currentYear, currentMonth]);
+
+  // Section 3: 자주 읽은 작가 (top 5)
+  const authorStats = useMemo(() => {
+    const counts = {};
+    for (const r of records) {
+      if (!r.author) continue;
+      const primary = r.author.split(',')[0].trim();
+      if (!primary) continue;
+      counts[primary] = (counts[primary] ?? 0) + 1;
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count], i) => ({
+        rank: i + 1,
+        initial: [...name][0],
+        name,
+        count,
+        rankColor: RANK_COLORS[i],
+      }));
+  }, [records]);
+
+  // Section 4: 장르별 기록 (완독만)
+  const genreData = useMemo(() => {
+    const counts = {};
+    for (const r of completedBooks) {
+      const genre = mapToGenre(r.category?.trim());
+      counts[genre] = (counts[genre] ?? 0) + 1;
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => ({ name, value, color: GENRE_COLOR_MAP[name] ?? '#D1D5DB' }));
+  }, [completedBooks]);
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -139,41 +185,35 @@ export default function RecordStatsPage() {
       <section className={styles.section}>
         <div className={styles.sectionRow}>
           <span className={styles.sectionTitle}>누적 완독 페이지</span>
-          <span
-            className={styles.sectionLinkGreen}
-            onClick={() => toast('챌린지 준비중입니다')}
-          >
+          <span className={styles.sectionLinkGreen} onClick={() => toast('챌린지 준비중입니다')}>
             챌린지→
           </span>
         </div>
 
         <div className={styles.stackCard}>
-          <p className={styles.stackHeading}>대단해요!</p>
-          <p className={styles.stackSubheading}>2살 아이의 키만큼 읽었어요</p>
-
-          <div className={styles.stackBody}>
-            {/* Left column */}
-            <div className={styles.stackLeft}>
-              <span className={styles.heightLabel}>0.8m</span>
-              <span className={styles.arrow}>↕</span>
+          {loading ? (
+            <p className={styles.stackHeading} style={{ color: 'var(--color-icon-muted)' }}>불러오는 중...</p>
+          ) : completedBooks.length === 0 ? (
+            <p className={styles.stackHeading}>아직 완독한 책이 없어요</p>
+          ) : (
+            <>
+              <p className={styles.stackHeading}>{milestone?.label ?? '대단해요!'}</p>
+              <p className={styles.stackSubheading}>
+                총 {completedBooks.length}권 · 약 {heightM}m
+              </p>
               <div className={styles.bookPills}>
-                {[...BOOK_STACK].reverse().map((book, i) => (
+                {[...completedBooks].reverse().map((book, i) => (
                   <div
-                    key={i}
+                    key={book.id}
                     className={styles.bookPill}
-                    style={{ background: book.color }}
+                    style={{ background: PILL_COLORS[i % PILL_COLORS.length] }}
                   >
                     <span className={styles.bookPillText}>{book.title}</span>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Right column */}
-            <div className={styles.stackRight}>
-              <BabySilhouette />
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -181,12 +221,6 @@ export default function RecordStatsPage() {
       <section className={styles.section}>
         <div className={styles.sectionRow}>
           <span className={styles.sectionTitle}>독서 달력</span>
-          <span
-            className={styles.sectionLinkGray}
-            onClick={() => toast('준비중입니다')}
-          >
-            자세히 보기
-          </span>
         </div>
 
         <div className={styles.card}>
@@ -212,11 +246,16 @@ export default function RecordStatsPage() {
           <div className={styles.dateGrid}>
             {cells.map((day, i) => {
               if (day === null) return <div key={i} className={styles.dateCell} />;
-              const bookImg = isBookMonth ? CALENDAR_BOOK_MAP[day] : null;
+              const bookImg = calendarMap[day];
               if (bookImg) {
                 return (
                   <div key={i} className={styles.dateCell}>
-                    <img src={bookImg} alt="" className={styles.bookThumb} />
+                    <img
+                      src={bookImg}
+                      alt=""
+                      className={styles.bookThumb}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
                   </div>
                 );
               }
@@ -236,97 +275,78 @@ export default function RecordStatsPage() {
       <section className={styles.section}>
         <div className={styles.sectionRow}>
           <span className={styles.sectionTitle}>자주 읽은 작가</span>
-          <span className={styles.countPill}>총 5명</span>
+          {authorStats.length > 0 && (
+            <span className={styles.countPill}>총 {authorStats.length}명</span>
+          )}
         </div>
 
         <div className={styles.card}>
-          {MOCK_AUTHORS.map((author, idx) => (
-            <div key={author.rank}>
-              <div className={styles.authorRow}>
-                <span className={styles.authorRank} style={{ color: author.rankColor }}>
-                  {author.rank}
-                </span>
-                <div className={styles.authorAvatar}>
-                  <span className={styles.authorInitial}>{author.initial}</span>
+          {authorStats.length === 0 ? (
+            <p style={{ textAlign: 'center', color: 'var(--color-icon-muted)', padding: '16px 0', fontSize: 14, margin: 0 }}>
+              아직 기록된 작가가 없어요
+            </p>
+          ) : (
+            <>
+              {authorStats.map((author, idx) => (
+                <div key={author.name}>
+                  <div className={styles.authorRow}>
+                    <span className={styles.authorRank} style={{ color: author.rankColor }}>
+                      {author.rank}
+                    </span>
+                    <div className={styles.authorAvatar}>
+                      <span className={styles.authorInitial}>{author.initial}</span>
+                    </div>
+                    <div className={styles.authorInfo}>
+                      <span className={styles.authorName}>{author.name}</span>
+                    </div>
+                    <span className={styles.authorCount}>{author.count}권</span>
+                  </div>
+                  {idx < authorStats.length - 1 && <div className={styles.divider} />}
                 </div>
-                <div className={styles.authorInfo}>
-                  <span className={styles.authorName}>{author.name}</span>
-                  <span className={styles.authorGenre}>{author.genre}</span>
+              ))}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* ── Section 4: 장르별 기록 (완독 1권 이상일 때만) ── */}
+      {completedBooks.length > 0 && (
+        <section className={styles.section}>
+          <div className={styles.sectionRow}>
+            <span className={styles.sectionTitle}>장르별 기록</span>
+          </div>
+
+          <div className={styles.card}>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={genreData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  dataKey="value"
+                  isAnimationActive={false}
+                >
+                  {genreData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+
+            <div className={styles.legend}>
+              {genreData.map(({ name, value, color }) => (
+                <div key={name} className={styles.legendRow}>
+                  <span className={styles.legendDot} style={{ background: color }} />
+                  <span className={styles.legendName}>{name}</span>
+                  <span className={styles.legendValue}>{value}권</span>
                 </div>
-                <span className={styles.authorCount}>{author.count}권</span>
-              </div>
-              {idx < MOCK_AUTHORS.length - 1 && <div className={styles.divider} />}
+              ))}
             </div>
-          ))}
-          <div
-            className={styles.viewAll}
-            onClick={() => toast('준비중입니다')}
-          >
-            전체보기
           </div>
-        </div>
-      </section>
-
-      {/* ── Section 4: 이 작가도 좋아할 것 같아요 ── */}
-      <section className={styles.section}>
-        <div className={styles.sectionRow}>
-          <span className={styles.sectionTitle}>이 작가도 좋아할 것 같아요</span>
-        </div>
-
-        <div className={styles.similarScroll}>
-          {MOCK_SIMILAR_AUTHORS.map((author) => (
-            <div key={author.name} className={styles.similarCard}>
-              <div className={styles.authorAvatar}>
-                <span className={styles.authorInitial}>{author.initial}</span>
-              </div>
-              <p className={styles.similarName}>{author.name}</p>
-              <button
-                className={styles.exploreBtn}
-                onClick={() => toast('준비중입니다')}
-              >
-                탐색
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Section 5: 장르별 기록 ── */}
-      <section className={styles.section}>
-        <div className={styles.sectionRow}>
-          <span className={styles.sectionTitle}>장르별 기록</span>
-        </div>
-
-        <div className={styles.card}>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={GENRE_DATA}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                dataKey="value"
-                isAnimationActive={false}
-              >
-                {GENRE_DATA.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-
-          <div className={styles.legend}>
-            {GENRE_DATA.map(({ name, value, color }) => (
-              <div key={name} className={styles.legendRow}>
-                <span className={styles.legendDot} style={{ background: color }} />
-                <span className={styles.legendName}>{name}</span>
-                <span className={styles.legendValue}>{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <BottomNav />
     </div>

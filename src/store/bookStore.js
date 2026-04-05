@@ -27,7 +27,7 @@ export const useBookStore = create((set, get) => ({
       .select()
       .single();
     if (error) {
-      set({ error: error.message, loading: false });
+set({ error: error.message, loading: false });
       throw error;
     }
     set((s) => ({ records: [data, ...s.records], loading: false }));

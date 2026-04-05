@@ -19,12 +19,12 @@
 .tabBtn {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   padding: 0;
 }
 
 .tabBtn.activeTab {
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-bold);
 }
 
@@ -51,13 +51,13 @@
 
 .subtitle {
   font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
 }
 
 .heroTitle {
   font-size: 22px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .streakRow {
@@ -66,7 +66,7 @@
   align-items: center;
   margin-top: var(--space-2);
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
 }
 
 .streakLeft {
@@ -88,7 +88,7 @@
   aspect-ratio: 3/4;
   border-radius: 6px;
   overflow: hidden;
-  background: var(--color-border);
+  background: var(--color-border-default);
   padding: 0;
   cursor: pointer;
 }
@@ -107,7 +107,7 @@
   justify-content: center;
   padding: var(--space-10) var(--space-4);
   gap: var(--space-4);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   text-align: center;
   font-size: var(--font-size-base);
 }
@@ -123,7 +123,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--color-text);
+  background: var(--color-text-primary);
   color: white;
   font-size: 28px;
   display: flex;

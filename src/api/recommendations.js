@@ -30,8 +30,12 @@ export async function getNextAvailableAt(userId) {
 }
 
 export async function requestNewRecommendation(userId) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
   const { data, error } = await supabase.functions.invoke('recommend-books', {
     body: { user_id: userId },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (error) throw error;
   return data;

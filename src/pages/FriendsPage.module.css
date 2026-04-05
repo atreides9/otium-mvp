@@ -1,6 +1,6 @@
 .page {
   min-height: 100svh;
-  background: #F2EDE6;
+  background: var(--color-bg-base);
   padding-bottom: calc(var(--bottom-nav-height) + var(--space-4));
 }
 
@@ -15,7 +15,7 @@
 .title {
   font-size: 22px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .headerIcons {
@@ -103,7 +103,7 @@
 .sectionTitle {
   font-size: 16px;
   font-weight: var(--font-weight-bold);
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   margin-bottom: 12px;
 }
 
@@ -143,12 +143,12 @@
   height: 8px;
   border-radius: 50%;
   background: #22C55E;
-  border: 1.5px solid #F2EDE6;
+  border: 1.5px solid var(--color-bg-base);
 }
 
 .friendName {
   font-size: 12px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   max-width: 48px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,7 +166,7 @@
 
 .findLink {
   font-size: 13px;
-  color: #3D6B4F;
+  color: var(--secondary-500);
 }
 
 .challengeBlock {
@@ -184,13 +184,13 @@
 .challengeTitle {
   font-size: 14px;
   font-weight: var(--font-weight-bold);
-  color: #3D6B4F;
+  color: var(--secondary-500);
   flex: 1;
 }
 
 .dday {
   font-size: 13px;
-  color: #3D6B4F;
+  color: var(--secondary-500);
   flex-shrink: 0;
 }
 
@@ -227,7 +227,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: var(--font-weight-bold);
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   flex-shrink: 0;
 }
 
@@ -253,20 +253,20 @@
 .pName {
   font-size: 14px;
   font-weight: var(--font-weight-bold);
-  color: #1A1A1A;
+  color: var(--color-text-primary);
 }
 
 .badgePill {
   background: #F3F4F6;
   font-size: 11px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   padding: 2px 6px;
   border-radius: 10px;
 }
 
 .pGoal {
   font-size: 13px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;

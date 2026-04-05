@@ -1,6 +1,6 @@
 .page {
   min-height: 100dvh;
-  background: #F0EBE3;
+  background: var(--color-bg-base);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,13 +17,13 @@
 .appName {
   font-size: 32px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   margin-bottom: 6px;
 }
 
 .appSub {
   font-size: 14px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   margin-bottom: 48px;
 }
 
@@ -39,25 +39,25 @@
   height: 48px;
   padding: 0 16px;
   font-size: 15px;
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   background: #fff;
-  border: 1px solid #E5E0D8;
+  border: 1px solid var(--color-border-default);
   border-radius: 10px;
   outline: none;
   -webkit-appearance: none;
 }
 
 .input::placeholder {
-  color: #9CA3AF;
+  color: var(--color-icon-muted);
 }
 
 .input:focus {
-  border-color: #3D7A5E;
+  border-color: var(--color-border-focus);
 }
 
 .error {
   font-size: 13px;
-  color: #E53E3E;
+  color: var(--color-status-error-icon);
   margin-top: -4px;
 }
 
@@ -67,7 +67,7 @@
   font-size: 17px;
   font-weight: 600;
   color: #fff;
-  background: #3D7A5E;
+  background: var(--secondary-500);
   border-radius: 10px;
   margin-top: 4px;
   transition: opacity 0.15s;
@@ -92,12 +92,12 @@
 
 .footerText {
   font-size: 14px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
 }
 
 .footerLink {
   font-size: 14px;
   font-weight: 600;
-  color: #3D7A5E;
+  color: var(--secondary-500);
   cursor: pointer;
 }

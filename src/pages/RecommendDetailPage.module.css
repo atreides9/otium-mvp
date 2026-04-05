@@ -1,6 +1,6 @@
 .page {
   min-height: 100svh;
-  background: #1A1A1A;
+  background: var(--color-text-primary);
 }
 
 .notFound {
@@ -10,7 +10,7 @@
   justify-content: center;
   min-height: 100svh;
   gap: 16px;
-  color: #1A1A1A;
+  color: var(--color-text-primary);
 }
 
 /* Header */
@@ -20,7 +20,7 @@
   justify-content: space-between;
   padding: 0 16px;
   height: 56px;
-  background: #1A1A1A;
+  background: var(--color-text-primary);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -67,7 +67,7 @@
 .nextBtn {
   font-size: 15px;
   font-weight: 500;
-  color: #3D6B4F;
+  color: var(--secondary-500);
   background: none;
   border: none;
   padding: 0;
@@ -79,7 +79,7 @@
 
 /* Hero */
 .hero {
-  background: linear-gradient(180deg, #2D2D2D 0%, #1A1A1A 100%);
+  background: linear-gradient(180deg, #2D2D2D 0%, var(--color-text-primary) 100%);
   padding: 24px 20px 0;
 }
 
@@ -154,7 +154,7 @@
 .sectionLabel {
   font-size: 16px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--color-text-primary);
   margin: 0 0 12px;
 }
 
@@ -179,7 +179,7 @@
 
 .tocItem {
   font-size: 14px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   line-height: 2.0;
 }
 
@@ -193,7 +193,7 @@
 
 .feedbackLabel {
   font-size: 14px;
-  color: #6B6B6B;
+  color: var(--color-text-tertiary);
   margin: 0;
   text-align: center;
 }
@@ -216,12 +216,12 @@
 
 .btnDislike {
   background: #ffffff;
-  border: 1px solid #E5E0D8;
-  color: #1A1A1A;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
 }
 
 .btnLike {
-  background: #3D6B4F;
+  background: var(--secondary-500);
   border: none;
   color: #ffffff;
 }

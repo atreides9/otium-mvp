@@ -13,15 +13,15 @@
   cursor: pointer;
   line-height: 1;
   padding: 0;
-  color: #E5E0D8;
+  color: var(--color-border-default);
 }
 
 .star.filled {
-  color: var(--color-star);
+  color: var(--warning-400);
 }
 
 .label {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   margin-top: var(--space-1);
 }

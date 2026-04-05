@@ -23,28 +23,23 @@
   color: var(--color-text-primary);
 }
 
-.headerStatus {
+.headerTitle {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  text-align: center;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  cursor: pointer;
 }
 
-.saveBtn {
+.editBtn {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   color: var(--color-cta-sub-fg);
   min-height: 44px;
-  padding: 0 var(--space-2);
-}
-
-.saveBtn:disabled {
-  color: var(--color-border-default);
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .bookInfo {
@@ -57,28 +52,49 @@
 }
 
 .thumb {
-  width: 40px;
-  height: 56px;
+  width: 56px;
+  height: 80px;
   object-fit: cover;
   border-radius: 4px;
   background: var(--color-border-default);
   flex-shrink: 0;
 }
 
+.bookMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .bookTitle {
   font-size: 16px;
   font-weight: var(--font-weight-bold);
-  flex: 1;
+  color: var(--color-text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.statusRow {
+.bookAuthor {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.statusSection {
   background: var(--color-bg-elevated);
-  padding: var(--space-6) var(--space-4) var(--space-4);
+  padding: var(--space-4);
   border-bottom: 1px solid var(--color-border-default);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: #fff;
 }
 
 .section {
@@ -90,48 +106,37 @@
   gap: var(--space-4);
 }
 
-.sectionLabel {
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rowLabel {
   font-size: 14px;
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  display: block;
 }
 
-.dateRow {
-  display: flex;
-  gap: var(--space-3);
-}
-
-.dateRow .dateInput {
-  flex: 1;
-  min-width: 0;
-}
-
-.dateInput {
-  height: 48px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: 0 var(--space-3);
+.rowValue {
   font-size: var(--font-size-base);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  width: 100%;
-  box-sizing: border-box;
+  color: var(--color-text-tertiary);
 }
 
-.progressDisplay {
+.progressWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.progressHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.progressEdge {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
-}
-
-.progressCurrent {
-  font-size: 20px;
+.progressText {
+  font-size: 18px;
   font-weight: var(--font-weight-bold);
   color: var(--color-text-secondary);
 }
@@ -148,43 +153,38 @@
   height: 100%;
   background: var(--color-cta-main-bg);
   border-radius: 4px;
-  transition: width 100ms;
-}
-
-.progressSlider {
-  width: 100%;
-  accent-color: var(--color-cta-main-bg);
-  cursor: pointer;
-  margin-top: -4px;
 }
 
 .ratingRow {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
-.ratingNumber {
-  font-size: 18px;
+.ratingNum {
+  font-size: 16px;
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
-.textarea {
-  width: 100%;
-  min-height: 120px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
-  font-size: var(--font-size-base);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  resize: none;
-  line-height: 1.6;
-  box-sizing: border-box;
+.reviewWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.textarea:focus {
-  outline: none;
-  border-color: var(--color-border-focus);
+.reviewText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
 }
