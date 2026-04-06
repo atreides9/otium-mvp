@@ -9,6 +9,13 @@ import styles from './RecordPage.module.css';
 
 const STATUS_OPTIONS = ['읽는중', '완독', '읽고싶은', '중단', '하차'];
 
+const GENRE_OPTIONS = [
+  '소설', '에세이', '자기계발', '경영/경제', '사회과학', '인문학',
+  '과학', '역사', '예술', '시', '희곡', '종교/역학',
+  '컴퓨터', '외국어', '만화/라이트노벨', '건강/취미', '여행',
+  '전집', '요리/살림', '좋은부모', '청소년', '어린이', '기타',
+];
+
 export default function RecordPage() {
   const navigate = useNavigate();
   const { isbn } = useParams();
@@ -21,6 +28,7 @@ export default function RecordPage() {
   const [progress, setProgress] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [genre, setGenre] = useState('');
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const [saving, setSaving] = useState(false);
@@ -48,6 +56,7 @@ export default function RecordPage() {
         title: book.title,
         author: book.authors?.join(', ') ?? book.author ?? '',
         thumbnail: book.thumbnail ?? '',
+        category: genre || book.category || '',
         status,
         progress: status === '읽는중' ? progress : null,
         start_date: startDate || null,
@@ -95,6 +104,22 @@ export default function RecordPage() {
 
       <div className={styles.statusRow}>
         <StatusPill options={STATUS_OPTIONS} selected={status} onChange={setStatus} />
+      </div>
+
+      <div className={styles.genreSection}>
+        <span className={styles.sectionLabel}>장르 <span className={styles.optional}>(선택)</span></span>
+        <div className={styles.genreScroll}>
+          {GENRE_OPTIONS.map((g) => (
+            <button
+              key={g}
+              className={`${styles.genrePill} ${genre === g ? styles.genrePillActive : ''}`}
+              onClick={() => setGenre(genre === g ? '' : g)}
+              type="button"
+            >
+              {g}
+            </button>
+          ))}
+        </div>
       </div>
 
       {status === '읽는중' && (

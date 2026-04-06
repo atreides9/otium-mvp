@@ -1,11 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Plus } from 'lucide-react';
+import { Search, Bell, Plus, Users, ChevronRight } from 'lucide-react';
 import { useBookStore } from '../store/bookStore';
-import { useToast } from '../components/Toast';
 import { useAuthStore } from '../store/authStore';
 import BottomNav from '../components/BottomNav';
 import styles from './LibraryPage.module.css';
+
+const JOINED_CHALLENGES = [
+  {
+    id: 1,
+    title: '완독 기록 누적 100m 가보자고 🔥',
+    desc: '함께 쌓는 독서 기록, 100m 달성!',
+    dday: 'D-12',
+    members: '25/40명',
+  },
+  {
+    id: 2,
+    title: '클럽 총합 50권 도전 📚',
+    desc: '한 달 안에 클럽 전체 50권 완독',
+    dday: 'D-42',
+    members: '18/30명',
+  },
+];
 
 const MOCK_BOOKS = [
   { isbn: '9788936434595', title: '채식주의자', thumbnail: 'https://covers.openlibrary.org/b/isbn/9781101906118-M.jpg' },
@@ -25,7 +41,6 @@ const MOCK_BOOKS = [
 export default function LibraryPage() {
   const navigate = useNavigate();
   const { records, loading, fetchRecords } = useBookStore();
-  const showToast = useToast();
   const nickname = useAuthStore((s) => s.nickname);
   const [activeTab, setActiveTab] = useState('서재');
 
@@ -44,7 +59,7 @@ export default function LibraryPage() {
             <button
               key={t}
               className={`${styles.tabBtn} ${activeTab === t ? styles.activeTab : ''}`}
-              onClick={() => t === '챌린지' ? showToast('준비중입니다') : setActiveTab(t)}
+              onClick={() => setActiveTab(t)}
               aria-pressed={activeTab === t}
             >
               {t}
@@ -52,8 +67,8 @@ export default function LibraryPage() {
           ))}
         </div>
         <div className={styles.headerIcons}>
-          <button className={styles.iconBtn} aria-label="검색" onClick={() => showToast('준비중입니다')}><Search size={20} /></button>
-          <button className={styles.iconBtn} aria-label="알림" onClick={() => showToast('준비중입니다')}><Bell size={20} /></button>
+          <button className={styles.iconBtn} aria-label="검색" onClick={() => navigate('/search')}><Search size={20} /></button>
+          <button className={styles.iconBtn} aria-label="알림" onClick={() => navigate('/mypage/notices')}><Bell size={20} /></button>
         </div>
       </header>
 
@@ -79,7 +94,7 @@ export default function LibraryPage() {
                   onClick={() => navigate(`/book/${r.kakao_isbn}`, { state: { record: r } })}
                   aria-label={r.title}
                 >
-                  <img src={r.thumbnail || '/book-placeholder.png'} alt={r.title} onError={(e) => { e.target.src = '/book-placeholder.png'; }} />
+                  <img src={r.thumbnail || '/book-placeholder.png'} alt={r.title} style={r.status !== '완독' ? { opacity: 0.55, filter: 'blur(3px) brightness(0.8) saturate(0.5)', transform: 'scale(1.04)' } : {}} onError={(e) => { e.target.src = '/book-placeholder.png'; }} />
                 </button>
               ))}
             </div>
@@ -94,8 +109,53 @@ export default function LibraryPage() {
           )}
         </>
       ) : (
-        <div className={styles.empty}>
-          <p>참여중인 챌린지가 없어요</p>
+        <div style={{ padding: '0 16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0 16px' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>참여중인 챌린지</h2>
+            <button
+              onClick={() => navigate('/challenges')}
+              style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, color: 'var(--color-text-tertiary)', cursor: 'pointer' }}
+            >
+              챌린지 찾기 <ChevronRight size={16} />
+            </button>
+          </div>
+          {JOINED_CHALLENGES.length === 0 ? (
+            <div className={styles.empty}>
+              <p>참여중인 챌린지가 없어요</p>
+              <button
+                onClick={() => navigate('/challenges')}
+                style={{ padding: '10px 20px', borderRadius: 20, background: 'var(--secondary-500)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+              >
+                챌린지 찾아보기
+              </button>
+            </div>
+          ) : (
+            JOINED_CHALLENGES.map((ch) => (
+              <div
+                key={ch.id}
+                style={{
+                  background: 'var(--color-surface-raised)',
+                  borderRadius: 12,
+                  padding: '16px',
+                  marginBottom: 12,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--secondary-500)', flex: 1, lineHeight: 1.4 }}>
+                    {ch.title}
+                  </span>
+                  <span style={{ fontSize: 13, color: 'var(--secondary-500)', fontWeight: 600, marginLeft: 8, flexShrink: 0 }}>
+                    {ch.dday}
+                  </span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--color-text-tertiary)', margin: '0 0 12px' }}>{ch.desc}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+                  <Users size={14} />
+                  {ch.members}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
 

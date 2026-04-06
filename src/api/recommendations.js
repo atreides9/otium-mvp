@@ -31,12 +31,26 @@ export async function getNextAvailableAt(userId) {
 
 export async function requestNewRecommendation(userId) {
   const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token;
 
-  const { data, error } = await supabase.functions.invoke('recommend-books', {
-    body: { user_id: userId },
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (error) throw error;
-  return data;
+  if (!session) throw new Error('로그인이 필요합니다');
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recommend-books`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ user_id: userId }),
+    }
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error ?? 'recommendation failed');
+  }
+
+  return await response.json();
 }

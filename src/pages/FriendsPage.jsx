@@ -1,5 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { Bell, Plus, UserCircle2, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useToast } from '../components/Toast';
 import styles from './FriendsPage.module.css';
 
 const DNA_SEGMENTS = [
@@ -39,13 +41,28 @@ const MOCK_CHALLENGES = [
 ];
 
 export default function FriendsPage() {
+  const navigate = useNavigate();
+  const showToast = useToast();
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>친구</h1>
         <div className={styles.headerIcons}>
-          <button className={styles.iconBtn} aria-label="알림"><Bell size={20} /></button>
-          <button className={styles.iconBtn} aria-label="추가"><Plus size={20} /></button>
+          <button
+            className={styles.iconBtn}
+            aria-label="알림"
+            onClick={() => showToast('새로운 알림이 없어요')}
+          >
+            <Bell size={20} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            aria-label="친구 추가"
+            onClick={() => navigate('/friends/add')}
+          >
+            <Plus size={20} />
+          </button>
         </div>
       </header>
 
@@ -79,20 +96,29 @@ export default function FriendsPage() {
         <p className={styles.sectionTitle}>친구들의 최근 기록</p>
         <div className={styles.friendsRow}>
           {MOCK_FRIENDS.map((f) => (
-            <div key={f.name} className={styles.friendItem}>
+            <button
+              key={f.name}
+              className={styles.friendItem}
+              onClick={() => navigate(`/friends/profile/${f.name}`)}
+            >
               <div className={styles.friendAvatarWrap}>
                 <UserCircle2 size={48} color="var(--color-icon-muted)" strokeWidth={1.5} />
                 {f.online && <span className={styles.onlineDot} />}
               </div>
               <span className={styles.friendName}>{f.name}</span>
-            </div>
+            </button>
           ))}
         </div>
 
         {/* Section 3: 참여중인 챌린지 */}
         <div className={styles.challengeHeader}>
           <p className={styles.sectionTitle} style={{ marginBottom: 0 }}>참여중인 챌린지</p>
-          <span className={styles.findLink}>챌린지 찾기→</span>
+          <button
+            className={styles.findLink}
+            onClick={() => navigate('/friends/challenges')}
+          >
+            챌린지 찾기→
+          </button>
         </div>
 
         {MOCK_CHALLENGES.map((ch) => (
@@ -105,7 +131,10 @@ export default function FriendsPage() {
             <div className={styles.participantCard}>
               {ch.participants.map((p, i) => (
                 <div key={p.name}>
-                  <div className={styles.participantRow}>
+                  <button
+                    className={styles.participantRow}
+                    onClick={() => navigate(`/friends/profile/${p.name}`)}
+                  >
                     <div className={styles.rankCircle}>{i + 1}</div>
                     <div className={styles.pAvatar}>
                       <UserCircle2 size={32} color="var(--color-icon-muted)" strokeWidth={1.5} />
@@ -118,7 +147,7 @@ export default function FriendsPage() {
                       <span className={styles.pGoal}>{p.goal}</span>
                     </div>
                     <ChevronRight size={16} color="var(--color-icon-muted)" />
-                  </div>
+                  </button>
                   {i < ch.participants.length - 1 && <div className={styles.divider} />}
                 </div>
               ))}

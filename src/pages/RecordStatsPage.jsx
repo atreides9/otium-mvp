@@ -99,6 +99,7 @@ export default function RecordStatsPage() {
     fetchRecords();
   }, []);
 
+
   const cells = buildCalendarDays(currentYear, currentMonth);
 
   function prevMonth() {
@@ -167,7 +168,7 @@ export default function RecordStatsPage() {
   const genreData = useMemo(() => {
     const counts = {};
     for (const r of completedBooks) {
-      const genre = mapToGenre(r.category?.trim());
+      const genre = mapToGenre(r.category?.trim() || '');
       counts[genre] = (counts[genre] ?? 0) + 1;
     }
     return Object.entries(counts)

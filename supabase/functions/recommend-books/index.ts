@@ -1,9 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const KAKAO_API_KEY = Deno.env.get('KAKAO_API_KEY')!;
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -46,9 +46,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-  // Verify JWT and extract user_id from token
+  // Verify JWT using the recommended Supabase Edge Function pattern:
+  // anon key client + user's JWT as global header → getUser() without param
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
@@ -56,15 +55,24 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-  const token = authHeader.slice(7);
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data: { user }, error: authError } = await userClient.auth.getUser();
   if (authError || !user) {
+    console.error('auth error:', authError);
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
   const user_id = user.id;
+
+  // Admin client for database operations
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   // 1. Load user's book_records
   const { data: allRecords, error: recordsError } = await supabase
@@ -169,31 +177,29 @@ Return JSON:
 
   let recommendations: Recommendation[];
   try {
-    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 512,
-        system: 'You are a book curator. Return only valid JSON. No markdown.',
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
-    });
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')!;
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'You are a book curator. Return only valid JSON. No markdown.\n\n' + userPrompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
+        }),
+      }
+    );
 
-    if (!claudeRes.ok) {
-      console.error('Claude API error:', claudeRes.status, await claudeRes.text());
+    if (!geminiRes.ok) {
+      console.error('Gemini API error:', geminiRes.status, await geminiRes.text());
       return new Response(JSON.stringify({ error: 'claude api error' }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const claudeData = await claudeRes.json();
-    const rawText: string = claudeData.content?.[0]?.text ?? '';
+    const geminiData = await geminiRes.json();
+    const rawText: string = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     const parsed = JSON.parse(rawText);
     recommendations = parsed.recommendations;
 
@@ -209,7 +215,35 @@ Return JSON:
     });
   }
 
-  // 5. Save to recommendations table
+  // Build book metadata map (must be defined before step 5)
+  const bookMap = new Map(candidateBooks.map((b) => [b.isbn, b]));
+
+  // 5. Upsert books into books table (required for FK on recommendations.book_id)
+  const booksToUpsert = recommendations.map((r) => {
+    const meta = bookMap.get(r.isbn);
+    return {
+      isbn: r.isbn,
+      title: meta?.title ?? '',
+      authors: meta?.authors ?? [],
+      thumbnail: meta?.thumbnail ?? '',
+      publisher: meta?.publisher ?? '',
+      contents: meta?.contents ?? '',
+    };
+  });
+
+  const { error: upsertBooksError } = await supabase
+    .from('books')
+    .upsert(booksToUpsert, { onConflict: 'isbn' });
+
+  if (upsertBooksError) {
+    console.error('books upsert error:', upsertBooksError);
+    return new Response(JSON.stringify({ error: 'database error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // 6. Save to recommendations table
   const shownAt = new Date().toISOString();
   const nextAvailableAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -231,8 +265,7 @@ Return JSON:
     });
   }
 
-  // 6. Build full metadata response
-  const bookMap = new Map(candidateBooks.map((b) => [b.isbn, b]));
+  // 7. Build full metadata response
   const responseBooks = recommendations.map((r) => {
     const meta = bookMap.get(r.isbn);
     return {

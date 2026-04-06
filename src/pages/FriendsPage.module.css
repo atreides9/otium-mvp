@@ -127,6 +127,10 @@
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .friendAvatarWrap {
@@ -167,6 +171,10 @@
 .findLink {
   font-size: 13px;
   color: var(--secondary-500);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .challengeBlock {
@@ -215,6 +223,11 @@
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 .rankCircle {

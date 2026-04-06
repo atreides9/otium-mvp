@@ -1,12 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookMarked, Compass, PenLine, Users, CircleUserRound } from 'lucide-react';
+import { BookMarked, Compass, PenLine, Trophy, CircleUserRound } from 'lucide-react';
 import styles from './BottomNav.module.css';
 
 const TABS = [
   { path: '/', label: '내서재', Icon: BookMarked },
   { path: '/explore', label: '탐색', Icon: Compass },
   { path: '/record-stats', label: '기록', Icon: PenLine },
-  { path: '/friends', label: '친구', Icon: Users },
+  { path: '/challenges', label: '챌린지', Icon: Trophy },
   { path: '/mypage', label: 'My', Icon: CircleUserRound },
 ];
 

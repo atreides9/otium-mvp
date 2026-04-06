@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle2, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
-import { useToast } from '../components/Toast';
 import { signOut } from '../api/userApi';
 import { useAuthStore } from '../store/authStore';
 import styles from './MyPage.module.css';
@@ -18,29 +17,29 @@ const MENU_GROUPS = [
   {
     label: '계정',
     items: [
-      { label: '계정 비공개/공개 전환', type: 'arrow' },
-      { label: '소셜 로그인 관리', type: 'arrow' },
+      { label: '계정 비공개/공개 전환', type: 'toggle' },
+      { label: '로그인 정보 관리', type: 'arrow', route: '/mypage/social' },
     ],
   },
   {
     label: '친구 & 채팅',
     items: [
-      { label: '친구 관리', type: 'arrow' },
-      { label: '채팅 설정', type: 'arrow', sub: '매주 월요일' },
+      { label: '친구 관리', type: 'arrow', route: '/friends' },
+      { label: '채팅 설정', type: 'arrow', route: '/mypage/chat', sub: '매주 월요일' },
     ],
   },
   {
     label: '알림 & 권한',
     items: [
       { label: '알림 설정', type: 'toggle' },
-      { label: '권한 설정', type: 'arrow' },
+      { label: '권한 설정', type: 'arrow', route: '/mypage/permissions' },
     ],
   },
   {
     label: '정보',
     items: [
-      { label: '공지사항', type: 'arrow' },
-      { label: '약관 및 정책', type: 'arrow' },
+      { label: '공지사항', type: 'arrow', route: '/mypage/notices' },
+      { label: '약관 및 정책', type: 'arrow', route: '/mypage/terms' },
       { label: '앱 버전', type: 'text', value: '1.2.0' },
     ],
   },
@@ -57,13 +56,13 @@ function Toggle({ on, onChange }) {
     >
       <span
         className={styles.toggleThumb}
-        style={{ transform: on ? 'translateX(20px)' : 'translateX(2px)' }}
+        style={{ transform: on ? 'translateX(22px)' : 'translateX(2px)' }}
       />
     </button>
   );
 }
 
-function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
+function MenuGroup({ group, toggleStates, onToggleChange, navigate }) {
   return (
     <div className={styles.card}>
       <p className={styles.groupLabel}>{group.label}</p>
@@ -71,7 +70,7 @@ function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
         <div key={item.label}>
           <div
             className={styles.menuRow}
-            onClick={item.type === 'arrow' ? () => onPress() : undefined}
+            onClick={item.type === 'arrow' ? () => navigate(item.route) : undefined}
             style={{ cursor: item.type === 'arrow' ? 'pointer' : 'default' }}
           >
             <div className={styles.menuLabelWrap}>
@@ -81,7 +80,7 @@ function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
             {item.type === 'arrow' && <ChevronRight size={18} color="var(--color-icon-muted)" />}
             {item.type === 'toggle' && (
               <Toggle
-                on={toggleStates[item.label] ?? true}
+                on={toggleStates[item.label] ?? false}
                 onChange={(v) => onToggleChange(item.label, v)}
               />
             )}
@@ -97,17 +96,17 @@ function MenuGroup({ group, toggleStates, onToggleChange, onPress }) {
 }
 
 export default function MyPage() {
-  const showToast = useToast();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const nickname = useAuthStore((state) => state.nickname);
-  const [toggleStates, setToggleStates] = useState({ '알림 설정': true });
+  const [toggleStates, setToggleStates] = useState({
+    '알림 설정': true,
+    '계정 비공개/공개 전환': false,
+  });
 
   const handleToggleChange = (label, value) => {
     setToggleStates((prev) => ({ ...prev, [label]: value }));
   };
-
-  const handlePress = () => showToast('준비중입니다');
 
   return (
     <div className={styles.page}>
@@ -141,7 +140,7 @@ export default function MyPage() {
               </div>
               <button
                 className={styles.editBtn}
-                onClick={() => showToast('준비중입니다')}
+                onClick={() => navigate('/mypage/edit')}
               >
                 프로필 수정
               </button>
@@ -156,7 +155,7 @@ export default function MyPage() {
             group={group}
             toggleStates={toggleStates}
             onToggleChange={handleToggleChange}
-            onPress={handlePress}
+            navigate={navigate}
           />
         ))}
 

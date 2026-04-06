@@ -10,6 +10,13 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
+
+  const isKorean = (str) => /[\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF]/.test(str);
+  const getNicknameMaxLen = (str) => isKorean(str) ? 10 : 12;
+  const handleNicknameChange = (e) => {
+    const val = e.target.value;
+    if (val.length <= getNicknameMaxLen(val)) setNickname(val);
+  };
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e) => {
@@ -63,7 +70,8 @@ export default function SignupPage() {
             type="text"
             placeholder="닉네임"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={handleNicknameChange}
+            maxLength={getNicknameMaxLen(nickname)}
             required
             autoComplete="nickname"
           />

@@ -11,7 +11,16 @@ import RecordStatsPage from './pages/RecordStatsPage';
 import ExplorePage from './pages/ExplorePage';
 import RecommendDetailPage from './pages/RecommendDetailPage';
 import MyPage from './pages/MyPage';
+import ProfileEditPage from './pages/ProfileEditPage';
+import SocialLoginPage from './pages/SocialLoginPage';
+import ChatSettingsPage from './pages/ChatSettingsPage';
+import PermissionsPage from './pages/PermissionsPage';
+import NoticesPage from './pages/NoticesPage';
+import TermsPage from './pages/TermsPage';
 import FriendsPage from './pages/FriendsPage';
+import FriendAddPage from './pages/FriendAddPage';
+import FriendProfilePage from './pages/FriendProfilePage';
+import ChallengesPage from './pages/ChallengesPage';
 import BookDetailPage from './pages/BookDetailPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -60,7 +69,16 @@ createRoot(document.getElementById('root')).render(
             <Route path="/explore/rec-detail" element={<ProtectedRoute><RecommendDetailPage /></ProtectedRoute>} />
             <Route path="/record-stats" element={<ProtectedRoute><RecordStatsPage /></ProtectedRoute>} />
             <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+            <Route path="/mypage/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
+            <Route path="/mypage/social" element={<ProtectedRoute><SocialLoginPage /></ProtectedRoute>} />
+            <Route path="/mypage/chat" element={<ProtectedRoute><ChatSettingsPage /></ProtectedRoute>} />
+            <Route path="/mypage/permissions" element={<ProtectedRoute><PermissionsPage /></ProtectedRoute>} />
+            <Route path="/mypage/notices" element={<ProtectedRoute><NoticesPage /></ProtectedRoute>} />
+            <Route path="/mypage/terms" element={<ProtectedRoute><TermsPage /></ProtectedRoute>} />
+            <Route path="/challenges" element={<ProtectedRoute><ChallengesPage /></ProtectedRoute>} />
             <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
+            <Route path="/friends/add" element={<ProtectedRoute><FriendAddPage /></ProtectedRoute>} />
+            <Route path="/friends/profile/:username" element={<ProtectedRoute><FriendProfilePage /></ProtectedRoute>} />
           </Routes>
         </AuthInit>
       </ToastProvider>
