@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useBookStore } from '../store/bookStore';
 import { useToast } from '../components/Toast';
 import StatusPill from '../components/StatusPill';
 import StarRating from '../components/StarRating';
+import { fetchCategoryByIsbn, fetchCategoryByTitle } from '../api/bookApi';
+import { mapToGenre } from '../utils/genreUtils';
 import styles from './RecordPage.module.css';
 
 const STATUS_OPTIONS = ['읽는중', '완독', '읽고싶은', '중단', '하차'];
@@ -28,10 +30,24 @@ export default function RecordPage() {
   const [progress, setProgress] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [genre, setGenre] = useState('');
+  const [genre, setGenre] = useState(() => {
+    if (state?.existing && book.category) return book.category;
+    if (book.category) return mapToGenre(book.category);
+    return '';
+  });
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (genre || state?.existing) return;
+    (async () => {
+      const isbn = book.isbn;
+      let categoryName = await fetchCategoryByIsbn(isbn);
+      if (!categoryName) categoryName = await fetchCategoryByTitle(book.title);
+      if (categoryName) setGenre(mapToGenre(categoryName));
+    })();
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -56,7 +72,7 @@ export default function RecordPage() {
         title: book.title,
         author: book.authors?.join(', ') ?? book.author ?? '',
         thumbnail: book.thumbnail ?? '',
-        category: genre || book.category || '',
+        category: genre,
         status,
         progress: status === '읽는중' ? progress : null,
         start_date: startDate || null,
