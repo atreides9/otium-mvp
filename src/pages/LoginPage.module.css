@@ -47,6 +47,28 @@
   -webkit-appearance: none;
 }
 
+.passwordWrap {
+  position: relative;
+  width: 100%;
+}
+
+.passwordWrap .input {
+  padding-right: 44px;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  color: var(--color-icon-muted);
+  background: none;
+  padding: 4px;
+  cursor: pointer;
+}
+
 .input::placeholder {
   color: var(--color-icon-muted);
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { signUp, insertUser } from '../api/userApi';
 import { useToast } from '../components/Toast';
 import styles from './SignupPage.module.css';
@@ -17,10 +18,20 @@ export default function SignupPage() {
     const val = e.target.value;
     if (val.length <= getNicknameMaxLen(val)) setNickname(val);
   };
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const validatePassword = (pw) => {
+    if (pw.length < 8) return '비밀번호는 8자 이상이어야 합니다';
+    if (!/[0-9]/.test(pw)) return '숫자를 포함해야 합니다';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) return '특수문자를 포함해야 합니다';
+    return null;
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    const pwError = validatePassword(password);
+    if (pwError) { showToast(pwError); return; }
     setLoading(true);
 
     try {
@@ -56,15 +67,20 @@ export default function SignupPage() {
             autoComplete="email"
             inputMode="email"
           />
-          <input
-            className={styles.input}
-            type="password"
-            placeholder="비밀번호 (6자 이상)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="new-password"
-          />
+          <div className={styles.passwordWrap}>
+            <input
+              className={styles.input}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="비밀번호 (숫자·특수문자 포함 8자 이상)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+            />
+            <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword((v) => !v)} tabIndex={-1}>
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           <input
             className={styles.input}
             type="text"
